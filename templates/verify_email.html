@@ -42,7 +42,7 @@
             <input type="email" class="form-control" id="email" placeholder="Enter your email" required autocomplete="off">
         </div>
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <button type="button" id='verify-btn' class="btn">Verify</button>
+            <button type="button" id='verify-btn' class="btn">Verify Email</button>
         </div>
     </form>
     <p class="text-center text-muted mt-4">
@@ -58,7 +58,7 @@
             event.preventDefault();
             var em = $('#email').val();
             
-            const email_validator = /^\w+([\.-]?\w+)*@(gmail|yahoo)\.[a-zA-Z]{2,}$/;
+            const email_validator = /^\w+([\.-]?\w+)*@(gmail)\.[a-zA-Z]{2,}$/;
 
             if(email_validator.test(em)){
                 $.ajax({
@@ -76,7 +76,7 @@
                     }
                 });            
             } else {
-                showErrorToast('Invalid email format.\n Valid formats : example@gmail.com \n or example@yahoo.com');
+                showErrorToast('Invalid email format.\n Valid formats : example@gmail.com');
             }
             
         });

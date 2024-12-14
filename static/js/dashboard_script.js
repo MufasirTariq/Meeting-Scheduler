@@ -155,7 +155,6 @@ $(document).ready(function(){
                         }
                 })
                 
-
             } else {
                 console.log('Password and Confirm Password do not match');
             }
@@ -172,7 +171,6 @@ $(document).ready(function(){
                 url: '/api/user/'+ id,
                 headers: {'Authorization': 'Bearer ' + token},
                 success: function(response) {
-                    // console.log(response)
                     if(response.message == 'Success'){
                         localStorage.removeItem('authToken');
                         localStorage.removeItem('user');
