@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% block title %} Dashboard {% endblock title %}
+{% block cdn %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../static/css/dashboard_style.css">
+{% endblock cdn %}
+{% block style %}
+{% endblock style %}
+
+{% block content %}
+
+    <div class="flex">
+        <!-- Vertical Navigation Bar -->
+        <div class="col-2 vh-100 bg-dark text-white p-3">
+            <h2 class="h4 font-weight-bold mb-4">{{user.username}}</h2>
+            <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <li class="nav-item">
+                    <a class="nav-link active" id="v-pills-calender-tab" data-toggle="pill" href="#v-pills-calender" role="tab" aria-controls="v-pills-calender" aria-selected="true">Calendar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="v-pills-addmeetings-tab" data-toggle="pill" href="#v-pills-addmeetings" role="tab" aria-controls="v-pills-addmeetings" aria-selected="false">Add Meetings</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" id="v-pills-usermanagment-tab" data-toggle="pill" href="#v-pills-usermanagment" role="tab" aria-controls="v-pills-usermanagment" aria-selected="false">User Management</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" id="v-pills-settings-tab" data-toggle="pill" href="#v-pills-settings" role="tab" aria-controls="v-pills-settings" aria-selected="false">Settings</a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" id="logout-tab" href="/logout" aria-controls="v-pills-logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="col-10 p-3">
+            <div class="tab-content" id="v-pills-tabContent">
+            
+                <!--Display Calender Tab -->
+                <div class="tab-pane fade show active" id="v-pills-calender" role="tabpanel" aria-labelledby="v-pills-calender-tab">  
+                    <div class="container mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <button id="prevMonth" class="btn btn-danger"><i class="fas fa-chevron-left"></i></button>
+                            <h2 id="currentMonth" class="h2 fw-bold"></h2>
+                            <button id="nextMonth" class="btn btn-danger"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="row text-center fw-bold">
+                            <div class="col">Sun</div>
+                            <div class="col">Mon</div>
+                            <div class="col">Tue</div>
+                            <div class="col">Wed</div>
+                            <div class="col">Thu</div>
+                            <div class="col">Fri</div>
+                            <div class="col">Sat</div>
+                        </div>
+                        <div id="calendarDays" class="calendar-days">
+                            <!-- Calendar days will be populated here -->
+                        </div>
+
+                            <!-- meeting data display Modal -->
+                            <div id="display-modal" class="display-modal hidden">
+                                <div class="display-modal-content">
+                                    <h2 class="display-modal-title">Meeting Details of <span id="display-modal-date"></span></h2>
+                                    <table class="event-table">
+                                        <thead>
+                                            <tr>
+                                                <th style='display:none'>ID</th>
+                                                <th>Name</th>
+                                                <th>Time</th>
+                                                <th>Platform</th>
+                                                <th>URL</th>
+                                                <th>Message</th>
+                                                <th id='th-action-display-model'>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="modal-meeting-body">
+                                            <!-- Meeting rows will be populated here -->
+                                        </tbody>
+                                    </table>
+                                    <div class="display-modal-footer">
+                                        <button id='display-modal-footer-delete-btn' onclick="closeDisplayModal()">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- confirmation delete meeting Modal -->
+                            <div id="delete-meeting-confirmation-modal" class="modal hidden">
+                                <div class="modal-overlay"></div>
+                                <div class="modal-content">
+                                    <h3 class="modal-title">Delete Meeting Confirmation</h3>
+                                    <p id="confirmation-message"></p>
+                                    <div class="modal-actions">
+                                        <button id="confirmDeleteMeeting" class="btn btn-danger">Yes, Delete</button>
+                                        <button id="closeDeleteMeetingModal" class="btn btn-secondary">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>     
+
+                    </div>      
+                </div>
+
+                <!-- Add Meetings to Calender Tab -->
+                <div class="tab-pane fade" id="v-pills-addmeetings" role="tabpanel" aria-labelledby="v-pills-addmeetings-tab">
+                    <div class="container p-4">
+                        <div class="d-flex justify-content-between mb-4">
+                            <button onclick="goToPreviousMonth()" class="btn btn-danger"><i class="fas fa-chevron-left"></i></button>
+                            <h2 id="currMonth" style="font-size: 1.25rem; font-weight: 700;"></h2>
+                            <button onclick="goToNextMonth()" class="btn btn-danger"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="row text-center font-weight-bold">
+                            <!-- Calendar Header -->
+                            <div class="col">Sun</div>
+                            <div class="col">Mon</div>
+                            <div class="col">Tue</div>
+                            <div class="col">Wed</div>
+                            <div class="col">Thu</div>
+                            <div class="col">Fri</div>
+                            <div class="col">Sat</div>
+                        </div>
+                        <div id="calendar-dates" class="calendar-dates"></div>
+                    </div>
+                    
+                    <!-- Modal -->
+                    <div id="modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
+                        <div class="bg-white p-6 rounded shadow-lg w-1/3">
+                            <h2 class="text-xl font-bold mb-4">Event Details</h2>
+                            <p id="modal-date" class="text-gray-700 mb-4"></p> 
+                            <form id="eventForm">
+                                <div class="mb-4 relative">
+                                    <label class="block text-gray-700">Username</label>
+                                    <input type="text" id="username" class="border p-2 rounded w-full" oninput="filterUserNames()" autocomplete="off">
+                                    <input type="text" id="search_user_id" style="display:none">
+                                    <ul id="results" class="absolute bg-white border border-gray-300 rounded w-full mt-1 z-10 hidden"></ul>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">Time</label>
+                                    <input type="time" id="time" class="border p-2 rounded w-full">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">Platform</label>
+                                    <input type="text" id="platform" class="border p-2 rounded w-full" autocomplete="off">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">URL</label>
+                                    <input type="url" id="url" class="border p-2 rounded w-full" autocomplete="off">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">Message</label>
+                                    <input type="text" id="msg" class="border p-2 rounded w-full" autocomplete="off">
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeModal()">Cancel</button>
+                                    <button type="button" id="addmeeting-btn" class="bg-blue-500 text-white px-4 py-2 rounded" onclick="saveEvent()">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Setting Tab -->
+                <div class="tab-pane fade" id="v-pills-settings" role="tabpanel" aria-labelledby="v-pills-settings-tab">
+                    <div class="container mx-auto p-4">
+                        <div class="bg-white p-4 rounded-lg shadow-lg">
+                            <h2 class="h4 font-weight-bold mb-4">Account Settings</h2>
+                            <form>
+                                <input type="text" id="updated_user_id" value={{user.id}} style='display:none'>
+                                <div class="mb-4">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" id="updated_name" value={{user.username}} class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" id="updated_email" value={{user.email}} class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="text" id="updated_password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" autocomplete="off">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="con_password" class="form-label">Confirm Password</label>
+                                    <input type="text" id="updated_con_password" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" autocomplete="off">
+                                </div>
+                        
+                                <div class="d-flex justify-content-between">
+                                    <button type="submit" id="updated_btn" class="btn btn-primary">Save Changes</button>
+                                    <button type="button" id="deleteAccount" class="btn btn-danger">Delete Account</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                
+                    <!-- Modal -->
+                    <div id="setting-modal" class="modal hidden">
+                        <div class="modal-overlay"></div>
+                        <div class="modal-content">
+                            <input type="text" id="delete_user_id" value={{user.id}} style='display:none'>
+                            <h3 class="modal-title">Delete Account</h3>
+                            <p class="modal-message">Are you sure you want to delete your account?</p>
+                            <div class="modal-actions">
+                                <button id="confirmDelete" class="btn btn-danger">Yes, Delete</button>
+                                <button id="closeSettingModal" class="btn btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+
+                <!-- User Management Tab -->
+                <div class="tab-pane fade" id="v-pills-usermanagment" role="tabpanel" aria-labelledby="v-pills-usermanagment-tab">
+                    <table class="table table-bordered text-center" id="user-display-table" >
+                        <thead>
+                            <tr>
+                                <th style="display: none;">User ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in user_list %}
+                            <tr>
+                                <td style="display: none;" class="user-managment-userId">{{ u['id'] }}</td>
+                                <td>{{ u['username'] }}</td>
+                                <td>{{ u['email'] }}</td>
+                                <td>{{ u['role'] }}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm user-managment-delete-btn" data-delete-user-confirm-user-id="{{ u['id'] }}" data-delete-user-confirm-username="{{ u['username'] }}"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <!--Modal for confirmation of user deletion-->
+                    <div id="delete-user-confirmation-modal" class="modal hidden">
+                        <div class="modal-overlay"></div>
+                        <div class="modal-content">
+                            <h3 class="modal-title">Delete Meeting Confirmation</h3>
+                            <p id="delete-user-confirmation-message"></p>
+                            <div class="modal-actions">
+                                <button id="confirmDeleteUser" class="btn btn-danger">Yes, Delete</button>
+                                <button id="closeDeleteUser" class="btn btn-secondary">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                        
+                </div> 
+            
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block script %}  
+  <script src='../static/js/dashboard_script.js' ></script>  
+{% endblock script %}

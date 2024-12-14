@@ -1,0 +1,115 @@
+{% extends "base.html" %} 
+{% block title %}Sign Up-Page{% endblock title %}
+{% block cdn %}
+{% endblock cdn %}
+{% block css %}
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f8f9fa; /* Light background */
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .card {
+        max-width: 450px;
+        width: 100%;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        background-color: white;
+    }
+    .btn {
+        padding: 10px 20px;
+        color: white;
+        background-color:red;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .btn:hover {
+        background-color:#ff0000b5;
+    }
+</style>
+{% endblock css %}
+{% block content %} 
+<div class="card">
+    <h2 class="text-center mb-4">SignUp</h2>
+    <form>
+        <div class="mb-3">
+            <input type="text" class="form-control" id="username" placeholder="Username" required autocomplete="off">
+        </div>
+        <div class="mb-3">
+            <input type="email" class="form-control" id="email" value={{email}} disabled>
+        </div>
+        <div class="mb-3">
+            <input type="password" class="form-control" id="password" placeholder="Password" required autocomplete="off">
+        </div>
+
+        <div class="mb-3">
+            <input type="password" class="form-control" id="con_password" placeholder="Confrim Password" required autocomplete="off">
+        </div>
+        
+        <div class="mb-3">
+            <select class="form-select" id="role" required>
+                <option value="user">User </option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button type="button" id='register-btn' class="btn">Register</button>
+        </div>
+    </form>
+    <p class="text-center text-muted mt-4">
+        Already have an account?<a href="/"> Sign In </a>
+    </p>
+</div>
+{% endblock content %}
+
+{% block script %}
+  <script>
+    $(document).ready(function(){
+        $('#register-btn').on('click', function(event){
+            event.preventDefault();
+            var em = $('#email').val();
+            var pw = $('#password').val();
+            var un = $('#username').val();
+            var ro = $('#role').val();
+            var con_pw = $('#con_password').val();
+            
+            const password_validator = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,15}$/;
+
+                if(password_validator.test(pw)){
+                    if(pw === con_pw){
+                        const data = {email: em, password: pw, username: un, role: ro};
+                        $.ajax({
+                            type: 'POST',
+                            url: '/api/user',
+                            data: JSON.stringify(data), 
+                            contentType: 'application/json',  
+                            success: function(response){
+                                if (response.message === 'Success'){
+                                    window.location.href = '/';
+                                } else {
+                                    showErrorToast(response.message)
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error:', error);
+                                showErrorToast(error)
+                            }
+                        });
+                                
+                    } else {
+                        showErrorToast('Password do not match')
+                    }
+                } else {
+                    showErrorToast('Password must have 8-15 characters, atleast one number, one uppercase letter, one lowercase letter and one special character')
+                }
+            
+        });
+    });
+  </script>
+{% endblock script %}
